@@ -73,28 +73,28 @@
         }
 
         #status {
-            margin-top: 20px;
+            margin-top: 10px; /* Уменьшен интервал */
             font-size: 1.2em;
         }
 
         #storage {
-            margin-top: 20px;
+            margin-top: 10px; /* Уменьшен интервал */
             font-size: 1.2em;
         }
 
         #level {
-            margin-top: 20px;
+            margin-top: 10px; /* Уменьшен интервал */
             font-size: 1.2em;
         }
 
         #growthTime {
-            margin-top: 10px;
+            margin-top: 10px; /* Уменьшен интервал */
             font-size: 1em;
             color: #ff9800;
         }
 
         #reward {
-            margin-top: 20px;
+            margin-top: 10px; /* Уменьшен интервал */
             font-size: 1.2em;
             color: #ff9800; /* Оранжевый цвет для награды */
         }
@@ -242,38 +242,37 @@
     };
 
     const checkTaskCompletion = () => {
-        const currentTask = tasks[currentLevel - 1];
         if (currentLevel === 1 && cabbageCount === 0) {
-            updateStatus('Задание выполнено! Переходите на следующий уровень.');
-            document.getElementById('currentReward').innerText = rewards[0].amount + ' FARMER';
-            document.getElementById('currentLevel').innerText = '2';
-            document.getElementById('levelTask').innerText = tasks[1].task;
-            currentLevel++;
+            proceedToNextLevel();
         } else if (currentLevel === 2 && carrotCount === 0) {
-            updateStatus('Задание выполнено! Переходите на следующий уровень.');
-            document.getElementById('currentReward').innerText = rewards[1].amount + ' FARMER';
-            document.getElementById('currentLevel').innerText = '3';
-            document.getElementById('levelTask').innerText = tasks[2].task;
-            currentLevel++;
+            proceedToNextLevel();
         } else if (currentLevel === 3 && cabbageCount < 2) {
-            updateStatus('Задание выполнено! Переходите на следующий уровень.');
-            document.getElementById('currentReward').innerText = rewards[2].amount + ' FARMER';
-            document.getElementById('currentLevel').innerText = '4';
-            document.getElementById('levelTask').innerText = tasks[3].task;
-            currentLevel++;
+            proceedToNextLevel();
         } else if (currentLevel === 4 && carrotCount < 3) {
-            updateStatus('Задание выполнено! Переходите на следующий уровень.');
-            document.getElementById('currentReward').innerText = rewards[3].amount + ' FARMER';
-            document.getElementById('currentLevel').innerText = '5';
-            document.getElementById('levelTask').innerText = tasks[4].task;
-            currentLevel++;
+            proceedToNextLevel();
         } else if (currentLevel === 5 && cabbageCount < 4) {
-            updateStatus('Задание выполнено! Вы завершили игру.');
-            document.getElementById('currentReward').innerText = rewards[4].amount + ' FARMER';
-            document.getElementById('currentLevel').innerText = '5';
-            document.getElementById('levelTask').innerText = 'Вы завершили игру.';
+            proceedToNextLevel();
         }
-    }
+    };
+
+    const proceedToNextLevel = () => {
+        updateStatus('Задание выполнено! Переходите на следующий уровень.');
+        document.getElementById('currentReward').innerText = rewards[currentLevel - 1].amount + ' FARMER';
+        currentLevel++;
+        document.getElementById('currentLevel').innerText = currentLevel;
+
+        if (currentLevel <= tasks.length) {
+            document.getElementById('levelTask').innerText = tasks[currentLevel - 1].task;
+        } else {
+            updateStatus('Вы завершили игру.');
+        }
+
+        // Очистка игрового поля и сброс счетчиков
+        document.getElementById('field').innerHTML = '';
+        plantedCount = 0;
+        cabbageCount = 0;
+        carrotCount = 0;
+    };
 
     document.getElementById('walletButton').onclick = () => {
         document.getElementById('walletModal').style.display = 'block';
@@ -291,18 +290,17 @@
     });
 
     document.getElementById('cabbageButton').onclick = () => {
-        currentPlantType = 'cabbage'; // Устанавливаем текущий тип растения на капусту
+        currentPlantType = 'cabbage'; 
         updateStatus('Выбран тип семени: Капуста.');
         document.getElementById('plantSelectionModal').style.display = 'none';
     };
 
     document.getElementById('carrotButton').onclick = () => {
-        currentPlantType = 'carrot'; // Устанавливаем текущий тип растения на морковку
+        currentPlantType = 'carrot'; 
         updateStatus('Выбран тип семени: Морковка.');
         document.getElementById('plantSelectionModal').style.display = 'none';
     };
 
-    // Обработчик для посадки растений
     document.getElementById('field').onclick = (event) => {
         if (event.target.id === 'field') {
             const rect = document.getElementById('field').getBoundingClientRect();
