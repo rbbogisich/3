@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Посадка растений</title>
     <style>
         body {
@@ -224,20 +224,21 @@
     };
 
     document.getElementById('harvestButton').onclick = () => {
-        if (currentPlantType === 'cabbage' && cabbageCount > 0) {
+        const currentTask = tasks[currentLevel - 1];
+        if (currentPlantType === 'cabbage' && cabbageCount > 0 && currentTask.requiredCabbage > 0) {
             cabbageCount--;
             document.getElementById('cabbageCount').innerText = cabbageCount;
             plantedCount--;
             checkTaskCompletion();
             updateStatus('Вы собрали капусту!');
-        } else if (currentPlantType === 'carrot' && carrotCount > 0) {
+        } else if (currentPlantType === 'carrot' && carrotCount > 0 && currentTask.requiredCarrot > 0) {
             carrotCount--;
             document.getElementById('carrotCount').innerText = carrotCount;
             plantedCount--;
             checkTaskCompletion();
             updateStatus('Вы собрали морковку!');
         } else {
-            updateStatus('У вас нет растений для сбора!');
+            updateStatus('У вас нет доступного урожая для сбора.');
         }
     };
 
@@ -301,7 +302,9 @@
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
 
-            if (plantedCount < maxPlants) {
+            const currentTask = tasks[currentLevel - 1];
+            // Проверка выполнения текущего задания
+            if (plantedCount < maxPlants && ((currentPlantType === 'cabbage' && currentTask.requiredCabbage > 0) || (currentPlantType === 'carrot' && currentTask.requiredCarrot > 0))) {
                 if (currentPlantType === 'cabbage') {
                     cabbageCount++;
                     document.getElementById('cabbageCount').innerText = cabbageCount;
@@ -313,10 +316,12 @@
                 updateStatus(`Вы посадили ${currentPlantType === 'cabbage' ? 'капусту' : 'морковку'}.`);
                 addPlant(currentPlantType, x, y);
             } else {
-                updateStatus('Максимальное количество посаженных растений достигнуто.');
+                updateStatus('Максимальное количество посаженных растений достигнуто или задание не позволяет сажать это растение.');
             }
         }
     };
+
+    const maxPlants = 10; // Максимальное количество растений
 </script>
 
 </body>
