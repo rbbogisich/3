@@ -37,33 +37,24 @@
             height: 40px;
             background-size: cover;
             background-position: center;
-            opacity: 0; /* Начальная непрозрачность для анимации */
-            transition: opacity 0.5s ease-in-out; /* Анимация при посадке */
-        }
-
-        .growing {
-            animation: grow 2s forwards; /* Анимация роста */
-        }
-
-        @keyframes grow {
-            0% {
-                transform: scale(0); /* Начальный масштаб */
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1); /* Конечный масштаб */
-                opacity: 1; /* Полная непрозрачность */
-            }
+            transition: background-color 0.5s ease-in-out; /* Анимация изменения цвета */
+            opacity: 1; /* Полная непрозрачность после роста */
         }
 
         .cabbage {
             background-image: url('kapysta.gif'); /* Замените на изображение капусты */
-            display: block;
         }
 
         .carrot {
             background-image: url('carrot.gif'); /* Замените на изображение морковки */
-            display: block;
+        }
+
+        .grown {
+            background-color: #66bb6a; /* Цвет для выросшего растения (капусты) */
+        }
+
+        .grownCarrot {
+            background-color: #ffb74d; /* Цвет для выросшего растения (морковки) */
         }
 
         .button {
@@ -87,6 +78,11 @@
         }
 
         #storage {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        #level {
             margin-top: 20px;
             font-size: 1.2em;
         }
@@ -146,7 +142,7 @@
     <p id="storage">Капуста: <span id="cabbageCount">0</span>, Морковка: <span id="carrotCount">0</span></p>
     <p id="level">Уровень: <span id="currentLevel">1</span></p>
     <p id="reward">Награда: <span id="currentReward"></span></p>
-    <p id="nextTask">Задание на уровень: <span id="levelTask">Посадить 2 капусты и собрать 2 урожая.</span></p>
+    <p id="nextTask">Задание на уровень: <span id="levelTask">Посадить 1 капусту и собрать 1 капусту.</span></p>
     <p id="growthTime">Растения растут...</p> <!-- Индикация роста -->
 </div>
 
@@ -188,24 +184,14 @@
         { level: 3, reward: '1 семечко капусты' },
         { level: 4, reward: '2 семечка капусты' },
         { level: 5, reward: '1 семечко морковки' },
-        { level: 6, reward: '3 семечка капусты' },
-        { level: 7, reward: '2 семечка морковки' },
-        { level: 8, reward: '3 семечка морковки' },
-        { level: 9, reward: '1 семечко капусты и 1 семечко морковки' },
-        { level: 10, reward: 'Специальный подарок (анимированное семечко)' }
     ];
 
     const tasks = [
-        { level: 1, task: 'Посадить 2 капусты и собрать 2 капусты.' },
-        { level: 2, task: 'Посадить 3 морковки и собрать 3 морковки.' },
-        { level: 3, task: 'Посадить 4 капусты и собрать 4 капусты.' },
-        { level: 4, task: 'Посадить 5 капуст и собрать 5 капуст.' },
-        { level: 5, task: 'Посадить 6 морковок и собрать 6 морковок.' },
-        { level: 6, task: 'Посадить 7 капуст и собрать 7 капуст.' },
-        { level: 7, task: 'Посадить 8 морковок и собрать 8 морковок.' },
-        { level: 8, task: 'Посадить 9 капуст и собрать 9 капуст.' },
-        { level: 9, task: 'Посадить 10 морковок и собрать 10 морковок.' },
-        { level: 10, task: 'Посадить 10 капуст и собрать 10 капуст.' },
+        { level: 1, task: 'Посадить 1 капусту и собрать 1 капусту.' },
+        { level: 2, task: 'Посадить 2 морковки и собрать 2 морковки.' },
+        { level: 3, task: 'Посадить 2 капусты и собрать 2 капусты.' },
+        { level: 4, task: 'Посадить 3 морковки и собрать 3 морковки.' },
+        { level: 5, task: 'Посадить 4 капусты и собрать 4 капусты.' },
     ];
 
     const updateStatus = (message) => {
@@ -214,14 +200,18 @@
 
     const addPlant = (type, x, y) => {
         const plant = document.createElement('div');
-        plant.classList.add('plant', type, 'growing'); // Добавляем класс для анимации
+        plant.classList.add('plant', type); // Добавляем класс для растения
         plant.style.left = `${x}px`;
         plant.style.top = `${y}px`;
         document.getElementById('field').appendChild(plant);
 
         // Таймер роста
         setTimeout(() => {
-            plant.classList.remove('growing');
+            if (type === 'cabbage') {
+                plant.classList.add('grown'); // Изменяем цвет для капусты
+            } else if (type === 'carrot') {
+                plant.classList.add('grownCarrot'); // Изменяем цвет для морковки
+            }
             updateStatus('Растение выросло! Можно собрать урожай.');
         }, growthTime * 1000);
     };
@@ -233,17 +223,53 @@
                 cabbageCount--;
                 document.getElementById('cabbageCount').innerText = cabbageCount;
                 plantedCount--;
+                checkTaskCompletion();
                 updateStatus('Вы собрали капусту!');
             } else if (currentPlantType === 'carrot' && carrotCount > 0) {
                 carrotCount--;
                 document.getElementById('carrotCount').innerText = carrotCount;
                 plantedCount--;
+                checkTaskCompletion();
                 updateStatus('Вы собрали морковку!');
             }
         } else {
             updateStatus('Нет растений для сбора.');
         }
     };
+
+    const checkTaskCompletion = () => {
+        const currentTask = tasks[currentLevel - 1];
+        if (currentLevel === 1 && cabbageCount === 0) {
+            updateStatus('Задание выполнено! Переходите на следующий уровень.');
+            document.getElementById('currentReward').innerText = rewards[0].reward;
+            document.getElementById('currentLevel').innerText = '2';
+            document.getElementById('levelTask').innerText = tasks[1].task;
+            currentLevel++;
+        } else if (currentLevel === 2 && carrotCount === 0) {
+            updateStatus('Задание выполнено! Переходите на следующий уровень.');
+            document.getElementById('currentReward').innerText = rewards[1].reward;
+            document.getElementById('currentLevel').innerText = '3';
+            document.getElementById('levelTask').innerText = tasks[2].task;
+            currentLevel++;
+        } else if (currentLevel === 3 && cabbageCount < 2) {
+            updateStatus('Задание выполнено! Переходите на следующий уровень.');
+            document.getElementById('currentReward').innerText = rewards[2].reward;
+            document.getElementById('currentLevel').innerText = '4';
+            document.getElementById('levelTask').innerText = tasks[3].task;
+            currentLevel++;
+        } else if (currentLevel === 4 && carrotCount < 3) {
+            updateStatus('Задание выполнено! Переходите на следующий уровень.');
+            document.getElementById('currentReward').innerText = rewards[3].reward;
+            document.getElementById('currentLevel').innerText = '5';
+            document.getElementById('levelTask').innerText = tasks[4].task;
+            currentLevel++;
+        } else if (currentLevel === 5 && cabbageCount < 4) {
+            updateStatus('Задание выполнено! Вы завершили игру.');
+            document.getElementById('currentReward').innerText = rewards[4].reward;
+            document.getElementById('currentLevel').innerText = '5';
+            document.getElementById('levelTask').innerText = 'Вы завершили игру.';
+        }
+    }
 
     document.getElementById('walletButton').onclick = () => {
         document.getElementById('walletModal').style.display = 'block';
