@@ -37,6 +37,23 @@
             height: 40px;
             background-size: cover;
             background-position: center;
+            opacity: 0; /* Начальная непрозрачность для анимации */
+            transition: opacity 0.5s ease-in-out; /* Анимация при посадке */
+        }
+
+        .growing {
+            animation: grow 2s forwards; /* Анимация роста */
+        }
+
+        @keyframes grow {
+            0% {
+                transform: scale(0); /* Начальный масштаб */
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1); /* Конечный масштаб */
+                opacity: 1; /* Полная непрозрачность */
+            }
         }
 
         .cabbage {
@@ -72,6 +89,12 @@
         #storage {
             margin-top: 20px;
             font-size: 1.2em;
+        }
+
+        #growthTime {
+            margin-top: 10px;
+            font-size: 1em;
+            color: #ff9800; /* Оранжевый цвет для индикации */
         }
 
         /* Стили для модального окна */
@@ -124,6 +147,7 @@
     <p id="level">Уровень: <span id="currentLevel">1</span></p>
     <p id="reward">Награда: <span id="currentReward"></span></p>
     <p id="nextTask">Задание на уровень: <span id="levelTask">Посадить 2 капусты и собрать 2 урожая.</span></p>
+    <p id="growthTime">Растения растут...</p> <!-- Индикация роста -->
 </div>
 
 <!-- Модальное окно для ввода адреса криптокошелька -->
@@ -155,8 +179,9 @@
     const plantHeight = 40;
     const margin = 10; // Граница между растениями
     const maxPlants = 20; // Максимальное количество семян
-    let currentPlantType = ''; // Текущий тип растения (капуста или морковка)
+    let currentPlantType = 'cabbage'; // Начальный тип растения
     let currentLevel = 1; // Текущий уровень
+    const growthTime = 5; // Время роста в секундах
     const rewards = [
         { level: 1, reward: '1 семечко капусты' },
         { level: 2, reward: '2 семечка морковки' },
@@ -180,148 +205,96 @@
         { level: 7, task: 'Посадить 8 морковок и собрать 8 морковок.' },
         { level: 8, task: 'Посадить 9 капуст и собрать 9 капуст.' },
         { level: 9, task: 'Посадить 10 морковок и собрать 10 морковок.' },
-        { level: 10, task: 'Максимальный уровень! Поздравляем!' }
+        { level: 10, task: 'Посадить 10 капуст и собрать 10 капуст.' },
     ];
 
-    document.getElementById('field').addEventListener('click', (event) => {
-        if (currentPlantType) {
-            plantSeeds(event);
-        }
-    });
-
-    document.getElementById('walletButton').addEventListener('click', openWalletModal);
-    document.getElementById('saveWalletButton').addEventListener('click', saveWallet);
-    document.getElementById('plantButton').addEventListener('click', openPlantSelectionModal);
-    document.getElementById('cabbageButton').addEventListener('click', () => selectPlant('cabbage'));
-    document.getElementById('carrotButton').addEventListener('click', () => selectPlant('carrot'));
-
-    const walletModal = document.getElementById('walletModal');
-    const plantSelectionModal = document.getElementById('plantSelectionModal');
-    const closeButtons = document.querySelectorAll('.close');
-
-    closeButtons.forEach(button => {
-        button.onclick = function() {
-            walletModal.style.display = "none";
-            plantSelectionModal.style.display = "none";
-        }
-    });
-
-    window.onclick = function(event) {
-        if (event.target === walletModal || event.target === plantSelectionModal) {
-            walletModal.style.display = "none";
-            plantSelectionModal.style.display = "none";
-        }
+    const updateStatus = (message) => {
+        document.getElementById('status').innerText = message;
     }
 
-    function openWalletModal() {
-        walletModal.style.display = "block";
-    }
-
-    function openPlantSelectionModal() {
-        plantSelectionModal.style.display = "block";
-    }
-
-    function selectPlant(type) {
-        currentPlantType = type; // Устанавливаем выбранный тип растения
-        plantSelectionModal.style.display = "none"; // Закрываем модальное окно выбора растения
-        document.getElementById('status').innerText = `Вы выбрали: ${type === 'cabbage' ? 'Капуста' : 'Морковка'}`;
-    }
-
-    function plantSeeds(event) {
-        if (plantedCount >= maxPlants) {
-            document.getElementById('status').innerText = 'Достигнуто максимальное количество растений!';
-            return;
-        }
-
-        const field = document.getElementById('field');
-        const rect = field.getBoundingClientRect();
-        const leftPosition = event.clientX - rect.left - (plantWidth / 2); // Центрируем семечко
-        const topPosition = event.clientY - rect.top - (plantHeight / 2); // Центрируем семечко
-
-        // Проверяем, пересекается ли с другими растениями
-        const overlap = plantedPositions.some(pos => 
-            Math.abs(pos.left - leftPosition) < (plantWidth + margin) &&
-            Math.abs(pos.top - topPosition) < (plantHeight + margin)
-        );
-
-        if (overlap) {
-            document.getElementById('status').innerText = 'Место занято! Выберите другое.';
-            return;
-        }
-
+    const addPlant = (type, x, y) => {
         const plant = document.createElement('div');
-        plant.className = 'plant ' + (currentPlantType === 'cabbage' ? 'cabbage' : 'carrot');
-        plant.style.left = `${leftPosition}px`;
-        plant.style.top = `${topPosition}px`;
-        field.appendChild(plant);
+        plant.classList.add('plant', type, 'growing'); // Добавляем класс для анимации
+        plant.style.left = `${x}px`;
+        plant.style.top = `${y}px`;
+        document.getElementById('field').appendChild(plant);
 
-        plantedPositions.push({ left: leftPosition, top: topPosition }); // Сохраняем координаты растения
-        plantedCount++;
-        document.getElementById('status').innerText = `Вы посадили семена! Всего посажено растений: ${plantedCount}`;
-        
-        currentPlantType = ''; // Сбрасываем текущий тип растения после посадки
-    }
+        // Таймер роста
+        setTimeout(() => {
+            plant.classList.remove('growing');
+            updateStatus('Растение выросло! Можно собрать урожай.');
+        }, growthTime * 1000);
+    };
 
-    function harvest() {
-        if (plantedCount === 0) {
-            document.getElementById('status').innerText = 'Нет урожая для сбора!';
-            return;
-        }
-
-        const field = document.getElementById('field');
-        while (field.firstChild) {
-            const plant = field.firstChild;
-            const isCabbage = plant.classList.contains('cabbage');
-            const isCarrot = plant.classList.contains('carrot');
-
-            // Увеличиваем счетчики собранных растений
-            if (isCabbage) {
-                cabbageCount++;
-            } else if (isCarrot) {
-                carrotCount++;
+    document.getElementById('harvestButton').onclick = () => {
+        // Проверяем, можно ли собрать урожай
+        if (plantedCount > 0) {
+            if (currentPlantType === 'cabbage' && cabbageCount > 0) {
+                cabbageCount--;
+                document.getElementById('cabbageCount').innerText = cabbageCount;
+                plantedCount--;
+                updateStatus('Вы собрали капусту!');
+            } else if (currentPlantType === 'carrot' && carrotCount > 0) {
+                carrotCount--;
+                document.getElementById('carrotCount').innerText = carrotCount;
+                plantedCount--;
+                updateStatus('Вы собрали морковку!');
             }
-            field.removeChild(plant);
-        }
-
-        plantedPositions = [];
-        plantedCount = 0;
-        document.getElementById('status').innerText = 'Вы собрали урожай!';
-        updateStorage(); // Обновляем счетчик хранилища
-        checkLevelUp(); // Проверяем, повысился ли уровень
-    }
-
-    function updateStorage() {
-        document.getElementById('cabbageCount').innerText = cabbageCount;
-        document.getElementById('carrotCount').innerText = carrotCount;
-    }
-
-    function checkLevelUp() {
-        const requiredTasks = tasks.find(task => task.level === currentLevel);
-        const requiredPlantings = requiredTasks.task.match(/\d+/g).map(Number); // Извлекаем количество семян из задания
-
-        if (cabbageCount >= requiredPlantings[0] && carrotCount >= requiredPlantings[1]) {
-            const reward = rewards[currentLevel - 1].reward;
-            document.getElementById('currentReward').innerText = `Вы получили: ${reward}`;
-            currentLevel++;
-            document.getElementById('currentLevel').innerText = currentLevel;
-            document.getElementById('levelTask').innerText = tasks[currentLevel - 1].task;
-            alert(`Поздравляем! Вы достигли уровня ${currentLevel} и получили награду: ${reward}`);
-        }
-    }
-
-    function saveWallet() {
-        const walletAddress = document.getElementById('walletAddress').value;
-        if (walletAddress) {
-            alert(`Адрес кошелька сохранен: ${walletAddress}`);
-            walletModal.style.display = "none"; // Закрываем модальное окно
-            document.getElementById('walletAddress').value = ''; // Очищаем поле ввода
         } else {
-            alert('Пожалуйста, введите адрес кошелька.');
+            updateStatus('Нет растений для сбора.');
         }
-    }
+    };
 
-    // Инициализируем начальное задание
-    document.getElementById('levelTask').innerText = tasks[currentLevel - 1].task;
+    document.getElementById('walletButton').onclick = () => {
+        document.getElementById('walletModal').style.display = 'block';
+    };
+
+    document.getElementById('plantButton').onclick = () => {
+        document.getElementById('plantSelectionModal').style.display = 'block';
+    };
+
+    // Закрытие модальных окон
+    document.querySelectorAll('.close').forEach(span => {
+        span.onclick = () => {
+            span.parentElement.parentElement.style.display = 'none';
+        }
+    });
+
+    document.getElementById('cabbageButton').onclick = () => {
+        currentPlantType = 'cabbage'; // Устанавливаем текущий тип растения на капусту
+        updateStatus('Выбран тип семени: Капуста.');
+        document.getElementById('plantSelectionModal').style.display = 'none';
+    };
+
+    document.getElementById('carrotButton').onclick = () => {
+        currentPlantType = 'carrot'; // Устанавливаем текущий тип растения на морковку
+        updateStatus('Выбран тип семени: Морковка.');
+        document.getElementById('plantSelectionModal').style.display = 'none';
+    };
+
+    // Обработчик для посадки растений
+    document.getElementById('field').onclick = (event) => {
+        if (event.target.id === 'field') {
+            const rect = document.getElementById('field').getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            if (plantedCount < maxPlants) {
+                if (currentPlantType === 'cabbage') {
+                    cabbageCount++;
+                    document.getElementById('cabbageCount').innerText = cabbageCount;
+                } else {
+                    carrotCount++;
+                    document.getElementById('carrotCount').innerText = carrotCount;
+                }
+                plantedCount++;
+                updateStatus(`Вы посадили ${currentPlantType === 'cabbage' ? 'капусту' : 'морковку'}.`);
+                addPlant(currentPlantType, x, y);
+            } else {
+                updateStatus('Максимальное количество посаженных растений достигнуто.');
+            }
+        }
+    };
 </script>
 
 </body>
