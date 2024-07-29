@@ -40,11 +40,13 @@
         }
 
         .cabbage {
-            background-image: url('kapusta.gif'); /* Замените на изображение капусты */
+            background-image: url('kapysta.gif'); /* Замените на изображение капусты */
+            display: block;
         }
 
         .carrot {
             background-image: url('carrot.gif'); /* Замените на изображение морковки */
+            display: block;
         }
 
         .button {
@@ -232,9 +234,14 @@
         plantedPositions.push({ left: leftPosition, top: topPosition }); // Сохраняем координаты растения
         plantedCount++;
         document.getElementById('status').innerText = `Вы посадили семена! Всего посажено растений: ${plantedCount}`;
-        
-        // Сброс текущего типа растения после посадки
-        currentPlantType = '';
+
+        // Предлагаем выбор семян после каждой пятой посадки
+        if (plantedCount % 5 === 0) {
+            currentPlantType = ''; // Сбрасываем текущий тип растения
+            openPlantSelectionModal();
+        } else {
+            currentPlantType = ''; // Сброс текущего типа растения после посадки
+        }
     }
 
     function harvest() {
