@@ -35,9 +35,16 @@
             position: absolute;
             width: 30px;
             height: 40px;
-            background-image: url('kapysta.gif'); /* Замените на свой файл с изображением */
             background-size: cover;
             background-position: center;
+        }
+
+        .cabbage {
+            background-image: url('kapysta.gif'); /* Замените на изображение капусты */
+        }
+
+        .carrot {
+            background-image: url('carrot.png'); /* Замените на изображение морковки */
         }
 
         .button {
@@ -61,7 +68,7 @@
         }
 
         /* Стили для модального окна */
-        #walletModal {
+        #walletModal, #plantSelectionModal {
             display: none; /* Скрыто по умолчанию */
             position: fixed;
             z-index: 1;
@@ -100,10 +107,11 @@
 <body>
 
 <div class="container">
-    <h1>Нажимай и сажай!</h1>
+    <h1>Посадка растений</h1>
     <div id="field"></div>
     <button id="harvestButton" class="button">Собрать урожай</button>
     <button id="walletButton" class="button">ВАЛЛЕТ</button> <!-- Кнопка для открытия кошелька -->
+    <button id="plantButton" class="button">Посадить семена</button> <!-- Кнопка для выбора растения -->
     <p id="status">Вы еще не посадили семена!</p>
 </div>
 
@@ -117,6 +125,16 @@
     </div>
 </div>
 
+<!-- Модальное окно для выбора растения -->
+<div id="plantSelectionModal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Выберите растение для посадки</h2>
+        <button id="cabbageButton" class="button">Капуста</button>
+        <button id="carrotButton" class="button">Морковка</button>
+    </div>
+</div>
+
 <script>
     let plantedCount = 0; // Счетчик для отслеживания количества посаженных растений
     let plantedPositions = []; // Массив для хранения координат посаженных растений
@@ -124,5 +142,93 @@
     const plantHeight = 40;
     const margin = 10; // Граница между растениями
     const maxPlants = 20; // Максимальное количество семян
+    let currentPlantType = ''; // Текущий тип растения (капуста или морковка)
 
-    document.getElementById
+    document.getElementById('field').addEventListener('click', (event) => {
+        if (currentPlantType) {
+            plantSeeds(event);
+        } else {
+            openPlantSelectionModal(); // Открываем выбор растения, если тип не выбран
+        }
+    });
+
+    document.getElementById('harvestButton').addEventListener('click', harvest);
+    document.getElementById('walletButton').addEventListener('click', openWalletModal);
+    document.getElementById('plantButton').addEventListener('click', openPlantSelectionModal);
+    document.getElementById('cabbageButton').addEventListener('click', () => selectPlant('cabbage'));
+    document.getElementById('carrotButton').addEventListener('click', () => selectPlant('carrot'));
+
+    const walletModal = document.getElementById('walletModal');
+    const plantSelectionModal = document.getElementById('plantSelectionModal');
+    const span = document.getElementsByClassName('close');
+
+    for (let i = 0; i < span.length; i++) {
+        span[i].onclick = function() {
+            walletModal.style.display = "none";
+            plantSelectionModal.style.display = "none";
+        }
+    }
+
+    window.onclick = function(event) {
+        if (event.target === walletModal || event.target === plantSelectionModal) {
+            walletModal.style.display = "none";
+            plantSelectionModal.style.display = "none";
+        }
+    }
+
+    document.getElementById('saveWalletButton').addEventListener('click', function() {
+        const walletAddress = document.getElementById('walletAddress').value;
+        if (walletAddress) {
+            alert(`Адрес кошелька сохранен: ${walletAddress}`);
+            walletModal.style.display = "none"; // Закрываем модальное окно
+            document.getElementById('walletAddress').value = ''; // Очищаем поле ввода
+        } else {
+            alert('Пожалуйста, введите адрес кошелька.');
+        }
+    });
+
+    function openWalletModal() {
+        walletModal.style.display = "block";
+    }
+
+    function openPlantSelectionModal() {
+        plantSelectionModal.style.display = "block";
+    }
+
+    function selectPlant(type) {
+        currentPlantType = type; // Устанавливаем выбранный тип растения
+        plantSelectionModal.style.display = "none"; // Закрываем модальное окно выбора растения
+        document.getElementById('status').innerText = `Вы выбрали: ${type === 'cabbage' ? 'Капуста' : 'Морковка'}`;
+    }
+
+    function plantSeeds(event) {
+        if (plantedCount >= maxPlants) {
+            document.getElementById('status').innerText = 'Достигнуто максимальное количество растений!';
+            return;
+        }
+
+        const field = document.getElementById('field');
+        const rect = field.getBoundingClientRect();
+        const leftPosition = event.clientX - rect.left - (plantWidth / 2); // Центрируем семечко
+        const topPosition = event.clientY - rect.top - (plantHeight / 2); // Центрируем семечко
+
+        // Проверяем, пересекается ли с другими растениями
+        const overlap = plantedPositions.some(pos => 
+            Math.abs(pos.left - leftPosition) < (plantWidth + margin) &&
+            Math.abs(pos.top - topPosition) < (plantHeight + margin)
+        );
+
+        if (overlap) {
+            document.getElementById('status').innerText = 'Место занято! Выберите другое.';
+            return;
+        }
+
+        const plant = document.createElement('div');
+        plant.className = 'plant ' + (currentPlantType === 'cabbage' ? 'cabbage' : 'carrot');
+        plant.style.left = `${leftPosition}px`;
+        plant.style.top = `${topPosition}px`;
+        field.appendChild(plant);
+
+        plantedPositions.push({ left: leftPosition, top: topPosition }); // Сохраняем координаты растения
+        plantedCount++;
+        document.getElementById
