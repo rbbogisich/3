@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Посадка растений Ильей Тобольским</title>
+    <title>Посадка растений</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -59,6 +59,42 @@
             margin-top: 20px;
             font-size: 1.2em;
         }
+
+        /* Стили для модального окна */
+        #walletModal {
+            display: none; /* Скрыто по умолчанию */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4); /* Полупрозрачный фон */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% сверху и снизу */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px; /* Ширина модального окна */
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -67,7 +103,18 @@
     <h1>Нажимай и сажай!</h1>
     <div id="field"></div>
     <button id="harvestButton" class="button">Собрать урожай</button>
+    <button id="walletButton" class="button">ВАЛЛЕТ</button> <!-- Кнопка для открытия кошелька -->
     <p id="status">Вы еще не посадили семена!</p>
+</div>
+
+<!-- Модальное окно для ввода адреса криптокошелька -->
+<div id="walletModal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Введите адрес криптокошелька</h2>
+        <input type="text" id="walletAddress" placeholder="Адрес кошелька" style="width: 100%; padding: 10px; margin-top: 10px;">
+        <button id="saveWalletButton" class="button" style="margin-top: 10px;">Сохранить</button>
+    </div>
 </div>
 
 <script>
@@ -78,58 +125,4 @@
     const margin = 10; // Граница между растениями
     const maxPlants = 20; // Максимальное количество семян
 
-    document.getElementById('field').addEventListener('click', plantSeeds);
-    document.getElementById('harvestButton').addEventListener('click', harvest);
-
-    function plantSeeds(event) {
-        if (plantedCount >= maxPlants) {
-            document.getElementById('status').innerText = 'Достигнуто максимальное количество растений!';
-            return;
-        }
-
-        const field = document.getElementById('field');
-        const rect = field.getBoundingClientRect();
-        const leftPosition = event.clientX - rect.left - (plantWidth / 2); // Центрируем семечко
-        const topPosition = event.clientY - rect.top - (plantHeight / 2); // Центрируем семечко
-
-        // Проверяем, пересекается ли с другими растениями
-        const overlap = plantedPositions.some(pos => 
-            Math.abs(pos.left - leftPosition) < (plantWidth + margin) &&
-            Math.abs(pos.top - topPosition) < (plantHeight + margin)
-        );
-
-        if (overlap) {
-            document.getElementById('status').innerText = 'Место занято! Выберите другое.';
-            return;
-        }
-
-        const plant = document.createElement('div');
-        plant.className = 'plant';
-        plant.style.left = `${leftPosition}px`;
-        plant.style.top = `${topPosition}px`;
-        field.appendChild(plant);
-
-        plantedPositions.push({ left: leftPosition, top: topPosition }); // Сохраняем координаты растения
-        plantedCount++;
-        document.getElementById('status').innerText = `Вы посадили семена! Всего посажено растений: ${plantedCount}`;
-    }
-
-    function harvest() {
-        if (plantedCount === 0) {
-            document.getElementById('status').innerText = 'Нет урожая для сбора!';
-            return;
-        }
-
-        const field = document.getElementById('field');
-        while (field.firstChild) {
-            field.removeChild(field.firstChild);
-        }
-
-        plantedPositions = [];
-        plantedCount = 0;
-        document.getElementById('status').innerText = 'Вы собрали урожай!';
-    }
-</script>
-
-</body>
-</html>
+    document.getElementById
