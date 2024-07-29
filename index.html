@@ -35,7 +35,7 @@
             position: absolute;
             width: 30px;
             height: 40px;
-            background-image: url('kapysta.gif');
+            background-image: url('kapysta.gif'); /* Замените на свой файл с изображением */
             background-size: cover;
             background-position: center;
         }
@@ -66,7 +66,6 @@
 <div class="container">
     <h1>Посадка растений</h1>
     <div id="field"></div>
-    <button id="plantButton" class="button">Посадить семена</button>
     <button id="harvestButton" class="button">Собрать урожай</button>
     <p id="status">Вы еще не посадили семена!</p>
 </div>
@@ -76,34 +75,33 @@
     let plantedPositions = []; // Массив для хранения координат посаженных растений
     const plantWidth = 30;
     const plantHeight = 40;
-    const margin = 20; // Увеличенная граница между растениями
+    const margin = 10; // Граница между растениями
     const maxPlants = 20; // Максимальное количество семян
-    let plantingInProgress = false; // Флаг для проверки процесса посадки
 
-    document.getElementById('plantButton').addEventListener('click', plantSeeds);
+    document.getElementById('field').addEventListener('click', plantSeeds);
     document.getElementById('harvestButton').addEventListener('click', harvest);
 
-    function plantSeeds() {
-        if (plantingInProgress || plantedCount >= maxPlants) {
-            if (plantedCount >= maxPlants) {
-                document.getElementById('status').innerText = 'Достигнуто максимальное количество растений!';
-            }
-            return; // Если посадка уже в процессе или достигнуто максимальное количество
+    function plantSeeds(event) {
+        if (plantedCount >= maxPlants) {
+            document.getElementById('status').innerText = 'Достигнуто максимальное количество растений!';
+            return;
         }
-        plantingInProgress = true;
 
         const field = document.getElementById('field');
-        let leftPosition, topPosition, overlap;
+        const rect = field.getBoundingClientRect();
+        const leftPosition = event.clientX - rect.left - (plantWidth / 2); // Центрируем семечко
+        const topPosition = event.clientY - rect.top - (plantHeight / 2); // Центрируем семечко
 
-        // Находим позицию без пересечений
-        do {
-            leftPosition = Math.random() * (field.clientWidth - plantWidth);
-            topPosition = Math.random() * (field.clientHeight - plantHeight);
-            overlap = plantedPositions.some(pos => 
-                Math.abs(pos.left - leftPosition) < (plantWidth + margin) &&
-                Math.abs(pos.top - topPosition) < (plantHeight + margin)
-            );
-        } while (overlap);
+        // Проверяем, пересекается ли с другими растениями
+        const overlap = plantedPositions.some(pos => 
+            Math.abs(pos.left - leftPosition) < (plantWidth + margin) &&
+            Math.abs(pos.top - topPosition) < (plantHeight + margin)
+        );
+
+        if (overlap) {
+            document.getElementById('status').innerText = 'Место занято! Выберите другое.';
+            return;
+        }
 
         const plant = document.createElement('div');
         plant.className = 'plant';
@@ -114,8 +112,6 @@
         plantedPositions.push({ left: leftPosition, top: topPosition }); // Сохраняем координаты растения
         plantedCount++;
         document.getElementById('status').innerText = `Вы посадили семена! Всего посажено растений: ${plantedCount}`;
-        
-        plantingInProgress = false; // Завершаем процесс
     }
 
     function harvest() {
