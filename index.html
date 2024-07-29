@@ -82,7 +82,12 @@
             background-color: #45a049;
         }
 
-        #status, #storage, #level, #growthTime, #reward {
+        #status {
+            margin-top: 10px; /* Уменьшен интервал */
+            font-size: 1.2em;
+        }
+
+        #storage, #level, #reward, #nextTask {
             margin-top: 10px; /* Уменьшен интервал */
             font-size: 1.2em;
         }
@@ -127,15 +132,18 @@
 
 <div class="container">
     <h1>Посадка растений</h1>
+
+    <!-- Перенесенные элементы -->
+    <p id="level">Уровень: <span id="currentLevel">1</span></p>
+    <p id="reward">Награда: <span id="currentReward">0 FARMER</span></p>
+    <p id="nextTask">Задание на уровень: <span id="levelTask">Посадить 1 капусту и собрать 1 капусту.</span></p>
+    
     <div id="field"></div>
     <button id="harvestButton" class="button">Собрать урожай</button>
     <button id="walletButton" class="button">ВАЛЛЕТ</button>
     <button id="plantButton" class="button">ВЫБОР СЕМЯН</button>
     <p id="status">Вы еще не посадили семена!</p>
     <p id="storage">Капуста: <span id="cabbageCount">0</span>, Морковка: <span id="carrotCount">0</span></p>
-    <p id="level">Уровень: <span id="currentLevel">1</span></p>
-    <p id="reward">Награда: <span id="currentReward">0 FARMER</span></p>
-    <p id="nextTask">Задание на уровень: <span id="levelTask">Посадить 1 капусту и собрать 1 капусту.</span></p>
     <p id="growthTime">Растения растут...</p>
 </div>
 
@@ -180,11 +188,11 @@
     ];
 
     const tasks = [
-        { level: 1, task: 'Посадить 1 капусту и собрать 1 капусту.' },
-        { level: 2, task: 'Посадить 2 морковки и собрать 2 морковки.' },
-        { level: 3, task: 'Посадить 2 капусты и собрать 2 капусты.' },
-        { level: 4, task: 'Посадить 3 морковки и собрать 3 морковки.' },
-        { level: 5, task: 'Посадить 4 капусты и собрать 4 капусты.' }
+        { level: 1, task: 'Посадить 1 капусту и собрать 1 капусту.', requiredCabbage: 1, requiredCarrot: 0 },
+        { level: 2, task: 'Посадить 2 морковки и собрать 2 морковки.', requiredCabbage: 0, requiredCarrot: 2 },
+        { level: 3, task: 'Посадить 2 капусты и собрать 2 капусты.', requiredCabbage: 2, requiredCarrot: 0 },
+        { level: 4, task: 'Посадить 3 морковки и собрать 3 морковки.', requiredCabbage: 0, requiredCarrot: 3 },
+        { level: 5, task: 'Посадить 4 капусты и собрать 4 капусты.', requiredCabbage: 4, requiredCarrot: 0 }
     ];
 
     const updateStatus = (message) => {
@@ -234,22 +242,18 @@
                 plantedCount--;
                 checkTaskCompletion();
                 updateStatus('Вы собрали морковку!');
+            } else {
+                updateStatus('У вас нет растений для сбора!');
             }
         } else {
-            updateStatus('Нет растений для сбора.');
+            updateStatus('Вы не посадили никаких растений.');
         }
     };
 
     const checkTaskCompletion = () => {
-        if (currentLevel === 1 && cabbageCount === 0) {
-            proceedToNextLevel();
-        } else if (currentLevel === 2 && carrotCount === 0) {
-            proceedToNextLevel();
-        } else if (currentLevel === 3 && cabbageCount < 2) {
-            proceedToNextLevel();
-        } else if (currentLevel === 4 && carrotCount < 3) {
-            proceedToNextLevel();
-        } else if (currentLevel === 5 && cabbageCount < 4) {
+        const currentTask = tasks[currentLevel - 1];
+        
+        if (cabbageCount >= currentTask.requiredCabbage && carrotCount >= currentTask.requiredCarrot) {
             proceedToNextLevel();
         }
     };
