@@ -169,14 +169,9 @@
     let plantedCount = 0; 
     let cabbageCount = 0; 
     let carrotCount = 0; 
-    let plantedPositions = []; 
-    const plantWidth = 30;
-    const plantHeight = 40;
-    const margin = 10; 
-    const maxPlants = 20; 
     let currentPlantType = 'cabbage'; 
     let currentLevel = 1; 
-    const growthTime = 5; 
+    const growthTime = 5000; // Время роста в миллисекундах
 
     // Награды за каждый уровень
     const rewards = [
@@ -225,28 +220,24 @@
 
             // Удаление индикатора роста
             growthIndicator.style.display = 'none';
-        }, growthTime * 1000);
+        }, growthTime);
     };
 
     document.getElementById('harvestButton').onclick = () => {
-        if (plantedCount > 0) {
-            if (currentPlantType === 'cabbage' && cabbageCount > 0) {
-                cabbageCount--;
-                document.getElementById('cabbageCount').innerText = cabbageCount;
-                plantedCount--;
-                checkTaskCompletion();
-                updateStatus('Вы собрали капусту!');
-            } else if (currentPlantType === 'carrot' && carrotCount > 0) {
-                carrotCount--;
-                document.getElementById('carrotCount').innerText = carrotCount;
-                plantedCount--;
-                checkTaskCompletion();
-                updateStatus('Вы собрали морковку!');
-            } else {
-                updateStatus('У вас нет растений для сбора!');
-            }
+        if (currentPlantType === 'cabbage' && cabbageCount > 0) {
+            cabbageCount--;
+            document.getElementById('cabbageCount').innerText = cabbageCount;
+            plantedCount--;
+            checkTaskCompletion();
+            updateStatus('Вы собрали капусту!');
+        } else if (currentPlantType === 'carrot' && carrotCount > 0) {
+            carrotCount--;
+            document.getElementById('carrotCount').innerText = carrotCount;
+            plantedCount--;
+            checkTaskCompletion();
+            updateStatus('Вы собрали морковку!');
         } else {
-            updateStatus('Вы не посадили никаких растений.');
+            updateStatus('У вас нет растений для сбора!');
         }
     };
 
