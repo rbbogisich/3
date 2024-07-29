@@ -35,7 +35,7 @@
             position: absolute;
             width: 30px;
             height: 40px;
-            background-image: url('kapysta.gif'); /* Используем ваше анимированное изображение */
+            background-image: url('kapysta.gif');
             background-size: cover;
             background-position: center;
         }
@@ -76,12 +76,22 @@
     let plantedPositions = []; // Массив для хранения координат посаженных растений
     const plantWidth = 30;
     const plantHeight = 40;
-    const margin = 10; // Граница между растениями
+    const margin = 20; // Увеличенная граница между растениями
+    const maxPlants = 20; // Максимальное количество семян
+    let plantingInProgress = false; // Флаг для проверки процесса посадки
 
     document.getElementById('plantButton').addEventListener('click', plantSeeds);
     document.getElementById('harvestButton').addEventListener('click', harvest);
 
     function plantSeeds() {
+        if (plantingInProgress || plantedCount >= maxPlants) {
+            if (plantedCount >= maxPlants) {
+                document.getElementById('status').innerText = 'Достигнуто максимальное количество растений!';
+            }
+            return; // Если посадка уже в процессе или достигнуто максимальное количество
+        }
+        plantingInProgress = true;
+
         const field = document.getElementById('field');
         let leftPosition, topPosition, overlap;
 
@@ -104,6 +114,8 @@
         plantedPositions.push({ left: leftPosition, top: topPosition }); // Сохраняем координаты растения
         plantedCount++;
         document.getElementById('status').innerText = `Вы посадили семена! Всего посажено растений: ${plantedCount}`;
+        
+        plantingInProgress = false; // Завершаем процесс
     }
 
     function harvest() {
