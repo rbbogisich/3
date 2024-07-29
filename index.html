@@ -33,13 +33,11 @@
 
         .plant {
             position: absolute;
-            bottom: 10px;
             width: 30px;
             height: 40px;
             background-image: url('kapysta.gif'); /* Используем ваше анимированное изображение */
             background-size: cover;
             background-position: center;
-            transform: translateX(-50%);
         }
 
         .button {
@@ -84,24 +82,27 @@
     document.getElementById('harvestButton').addEventListener('click', harvest);
 
     function plantSeeds() {
-        // Создание растения
         const field = document.getElementById('field');
-        let leftPosition;
-        let overlap;
+        let leftPosition, topPosition, overlap;
 
         // Находим позицию без пересечений
         do {
             leftPosition = Math.random() * (field.clientWidth - plantWidth);
-            overlap = plantedPositions.some(pos => Math.abs(pos - leftPosition) < (plantWidth + margin));
+            topPosition = Math.random() * (field.clientHeight - plantHeight);
+            overlap = plantedPositions.some(pos => 
+                Math.abs(pos.left - leftPosition) < (plantWidth + margin) &&
+                Math.abs(pos.top - topPosition) < (plantHeight + margin)
+            );
         } while (overlap);
 
         const plant = document.createElement('div');
         plant.className = 'plant';
-        plant.style.left = `${leftPosition}px`; // Устанавливаем положение растения
+        plant.style.left = `${leftPosition}px`;
+        plant.style.top = `${topPosition}px`;
         field.appendChild(plant);
 
-        plantedPositions.push(leftPosition); // Сохраняем позицию растения
-        plantedCount++; // Увеличиваем счетчик
+        plantedPositions.push({ left: leftPosition, top: topPosition }); // Сохраняем координаты растения
+        plantedCount++;
         document.getElementById('status').innerText = `Вы посадили семена! Всего посажено растений: ${plantedCount}`;
     }
 
@@ -111,14 +112,13 @@
             return;
         }
 
-        // Убираем все растения
         const field = document.getElementById('field');
         while (field.firstChild) {
             field.removeChild(field.firstChild);
         }
 
-        plantedPositions = []; // Очищаем массив координат
-        plantedCount = 0; // Сбрасываем счетчик
+        plantedPositions = [];
+        plantedCount = 0;
         document.getElementById('status').innerText = 'Вы собрали урожай!';
     }
 </script>
