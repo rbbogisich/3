@@ -69,6 +69,11 @@
             font-size: 1.2em;
         }
 
+        #storage {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
         /* Стили для модального окна */
         #walletModal, #plantSelectionModal {
             display: none; /* Скрыто по умолчанию */
@@ -115,6 +120,9 @@
     <button id="walletButton" class="button">ВАЛЛЕТ</button> <!-- Кнопка для открытия кошелька -->
     <button id="plantButton" class="button">ВЫБОР СЕМЯН</button> <!-- Кнопка для выбора растения -->
     <p id="status">Вы еще не посадили семена!</p>
+    <p id="storage">Капуста: <span id="cabbageCount">0</span>, Морковка: <span id="carrotCount">0</span></p>
+    <p id="level">Уровень: <span id="currentLevel">1</span></p>
+    <p id="reward">Награда: <span id="currentReward"></span></p>
 </div>
 
 <!-- Модальное окно для ввода адреса криптокошелька -->
@@ -139,12 +147,27 @@
 
 <script>
     let plantedCount = 0; // Счетчик для отслеживания количества посаженных растений
+    let cabbageCount = 0; // Счетчик капусты
+    let carrotCount = 0; // Счетчик морковки
     let plantedPositions = []; // Массив для хранения координат посаженных растений
     const plantWidth = 30;
     const plantHeight = 40;
     const margin = 10; // Граница между растениями
     const maxPlants = 20; // Максимальное количество семян
     let currentPlantType = ''; // Текущий тип растения (капуста или морковка)
+    let currentLevel = 1; // Текущий уровень
+    const rewards = [
+        { level: 1, reward: '1 семечко капусты' },
+        { level: 2, reward: '2 семечка морковки' },
+        { level: 3, reward: '1 семечко капусты' },
+        { level: 4, reward: '2 семечка капусты' },
+        { level: 5, reward: '1 семечко морковки' },
+        { level: 6, reward: '3 семечка капусты' },
+        { level: 7, reward: '2 семечка морковки' },
+        { level: 8, reward: '3 семечка морковки' },
+        { level: 9, reward: '1 семечко капусты и 1 семечко морковки' },
+        { level: 10, reward: 'Специальный подарок (анимированное семечко)' }
+    ];
 
     document.getElementById('field').addEventListener('click', (event) => {
         if (currentPlantType) {
@@ -252,12 +275,44 @@
 
         const field = document.getElementById('field');
         while (field.firstChild) {
-            field.removeChild(field.firstChild);
+            const plant = field.firstChild;
+            const isCabbage = plant.classList.contains('cabbage');
+            const isCarrot = plant.classList.contains('carrot');
+
+            // Увеличиваем счетчики собранных растений
+            if (isCabbage) {
+                cabbageCount++;
+            } else if (isCarrot) {
+                carrotCount++;
+            }
+            field.removeChild(plant);
         }
 
         plantedPositions = [];
         plantedCount = 0;
         document.getElementById('status').innerText = 'Вы собрали урожай!';
+        updateStorage(); // Обновляем счетчик хранилища
+        checkLevelUp(); // Проверяем, повысился ли уровень
+    }
+
+    function updateStorage() {
+        document.getElementById('cabbageCount').innerText = cabbageCount;
+        document.getElementById('carrotCount').innerText = carrotCount;
+    }
+
+    function checkLevelUp() {
+        const totalHarvested = cabbageCount + carrotCount;
+        if (totalHarvested >= currentLevel * 2) { // Условие для повышения уровня
+            if (currentLevel < rewards.length) {
+                const reward = rewards[currentLevel - 1].reward;
+                document.getElementById('currentReward').innerText = `Вы получили: ${reward}`;
+                currentLevel++;
+                document.getElementById('currentLevel').innerText = currentLevel;
+                alert(`Поздравляем! Вы достигли уровня ${currentLevel} и получили награду: ${reward}`);
+            } else {
+                document.getElementById('currentReward').innerText = 'Максимальный уровень достигнут!';
+            }
+        }
     }
 </script>
 
