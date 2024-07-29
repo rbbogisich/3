@@ -40,7 +40,7 @@
         }
 
         .cabbage {
-            background-image: url('kapysta.gif'); /* Замените на изображение капусты */
+            background-image: url('kapusta.gif'); /* Замените на изображение капусты */
         }
 
         .carrot {
@@ -111,7 +111,7 @@
     <div id="field"></div>
     <button id="harvestButton" class="button">Собрать урожай</button>
     <button id="walletButton" class="button">ВАЛЛЕТ</button> <!-- Кнопка для открытия кошелька -->
-    <button id="plantButton" class="button">Посадить семена</button> <!-- Кнопка для выбора растения -->
+    <button id="plantButton" class="button">ВЫБОР СЕМЯН</button> <!-- Кнопка для выбора растения -->
     <p id="status">Вы еще не посадили семена!</p>
 </div>
 
@@ -231,4 +231,28 @@
 
         plantedPositions.push({ left: leftPosition, top: topPosition }); // Сохраняем координаты растения
         plantedCount++;
-        document.getElementById
+        document.getElementById('status').innerText = `Вы посадили семена! Всего посажено растений: ${plantedCount}`;
+        
+        // Сброс текущего типа растения после посадки
+        currentPlantType = '';
+    }
+
+    function harvest() {
+        if (plantedCount === 0) {
+            document.getElementById('status').innerText = 'Нет урожая для сбора!';
+            return;
+        }
+
+        const field = document.getElementById('field');
+        while (field.firstChild) {
+            field.removeChild(field.firstChild);
+        }
+
+        plantedPositions = [];
+        plantedCount = 0;
+        document.getElementById('status').innerText = 'Вы собрали урожай!';
+    }
+</script>
+
+</body>
+</html>
