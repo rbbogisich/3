@@ -36,7 +36,7 @@
             bottom: 10px;
             width: 30px;
             height: 40px;
-            background-image: url('8ympzy.gif'); /* Используем ваше анимированное изображение */
+            background-image: url('animated_seed.gif'); /* Используем ваше анимированное изображение */
             background-size: cover;
             background-position: center;
             transform: translateX(-50%);
@@ -75,6 +75,10 @@
 
 <script>
     let plantedCount = 0; // Счетчик для отслеживания количества посаженных растений
+    let plantedPositions = []; // Массив для хранения координат посаженных растений
+    const plantWidth = 30;
+    const plantHeight = 40;
+    const margin = 10; // Граница между растениями
 
     document.getElementById('plantButton').addEventListener('click', plantSeeds);
     document.getElementById('harvestButton').addEventListener('click', harvest);
@@ -82,11 +86,21 @@
     function plantSeeds() {
         // Создание растения
         const field = document.getElementById('field');
+        let leftPosition;
+        let overlap;
+
+        // Находим позицию без пересечений
+        do {
+            leftPosition = Math.random() * (field.clientWidth - plantWidth);
+            overlap = plantedPositions.some(pos => Math.abs(pos - leftPosition) < (plantWidth + margin));
+        } while (overlap);
+
         const plant = document.createElement('div');
         plant.className = 'plant';
-        plant.style.left = `${Math.random() * 100}%`; // Случайное положение растения
+        plant.style.left = `${leftPosition}px`; // Устанавливаем положение растения
         field.appendChild(plant);
 
+        plantedPositions.push(leftPosition); // Сохраняем позицию растения
         plantedCount++; // Увеличиваем счетчик
         document.getElementById('status').innerText = `Вы посадили семена! Всего посажено растений: ${plantedCount}`;
     }
@@ -103,6 +117,7 @@
             field.removeChild(field.firstChild);
         }
 
+        plantedPositions = []; // Очищаем массив координат
         plantedCount = 0; // Сбрасываем счетчик
         document.getElementById('status').innerText = 'Вы собрали урожай!';
     }
