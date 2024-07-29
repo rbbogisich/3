@@ -123,6 +123,7 @@
     <p id="storage">Капуста: <span id="cabbageCount">0</span>, Морковка: <span id="carrotCount">0</span></p>
     <p id="level">Уровень: <span id="currentLevel">1</span></p>
     <p id="reward">Награда: <span id="currentReward"></span></p>
+    <p id="nextTask">Задание на уровень: <span id="levelTask">Посадить 2 капусты и собрать 2 урожая.</span></p>
 </div>
 
 <!-- Модальное окно для ввода адреса криптокошелька -->
@@ -169,11 +170,22 @@
         { level: 10, reward: 'Специальный подарок (анимированное семечко)' }
     ];
 
+    const tasks = [
+        { level: 1, task: 'Посадить 2 капусты и собрать 2 урожая.' },
+        { level: 2, task: 'Посадить 3 морковки и собрать 3 урожая.' },
+        { level: 3, task: 'Посадить 4 капусты и собрать 4 урожая.' },
+        { level: 4, task: 'Посадить 5 капуст и собрать 5 урожая.' },
+        { level: 5, task: 'Посадить 6 морковок и собрать 6 урожая.' },
+        { level: 6, task: 'Посадить 7 капуст и собрать 7 урожая.' },
+        { level: 7, task: 'Посадить 8 морковок и собрать 8 урожая.' },
+        { level: 8, task: 'Посадить 9 капуст и собрать 9 урожая.' },
+        { level: 9, task: 'Посадить 10 морковок и собрать 10 урожая.' },
+        { level: 10, task: 'Максимальный уровень! Поздравляем!' }
+    ];
+
     document.getElementById('field').addEventListener('click', (event) => {
         if (currentPlantType) {
             plantSeeds(event);
-        } else {
-            openPlantSelectionModal(); // Открываем выбор растения, если тип не выбран
         }
     });
 
@@ -185,14 +197,14 @@
 
     const walletModal = document.getElementById('walletModal');
     const plantSelectionModal = document.getElementById('plantSelectionModal');
-    const span = document.getElementsByClassName('close');
+    const closeButtons = document.querySelectorAll('.close');
 
-    for (let i = 0; i < span.length; i++) {
-        span[i].onclick = function() {
+    closeButtons.forEach(button => {
+        button.onclick = function() {
             walletModal.style.display = "none";
             plantSelectionModal.style.display = "none";
         }
-    }
+    });
 
     window.onclick = function(event) {
         if (event.target === walletModal || event.target === plantSelectionModal) {
@@ -257,14 +269,8 @@
         plantedPositions.push({ left: leftPosition, top: topPosition }); // Сохраняем координаты растения
         plantedCount++;
         document.getElementById('status').innerText = `Вы посадили семена! Всего посажено растений: ${plantedCount}`;
-
-        // Предлагаем выбор семян после каждой пятой посадки
-        if (plantedCount % 5 === 0) {
-            currentPlantType = ''; // Сбрасываем текущий тип растения
-            openPlantSelectionModal();
-        } else {
-            currentPlantType = ''; // Сброс текущего типа растения после посадки
-        }
+        
+        currentPlantType = ''; // Сбрасываем текущий тип растения после посадки
     }
 
     function harvest() {
@@ -302,18 +308,21 @@
 
     function checkLevelUp() {
         const totalHarvested = cabbageCount + carrotCount;
-        if (totalHarvested >= currentLevel * 2) { // Условие для повышения уровня
-            if (currentLevel < rewards.length) {
-                const reward = rewards[currentLevel - 1].reward;
-                document.getElementById('currentReward').innerText = `Вы получили: ${reward}`;
-                currentLevel++;
-                document.getElementById('currentLevel').innerText = currentLevel;
-                alert(`Поздравляем! Вы достигли уровня ${currentLevel} и получили награду: ${reward}`);
-            } else {
-                document.getElementById('currentReward').innerText = 'Максимальный уровень достигнут!';
-            }
+        const requiredTasks = tasks.find(task => task.level === currentLevel);
+        const requiredPlantings = requiredTasks.task.match(/\d+/g).map(Number); // Извлекаем количество семян из задания
+
+        if (cabbageCount >= requiredPlantings[0] && carrotCount >= requiredPlantings[1]) {
+            const reward = rewards[currentLevel - 1].reward;
+            document.getElementById('currentReward').innerText = `Вы получили: ${reward}`;
+            currentLevel++;
+            document.getElementById('currentLevel').innerText = currentLevel;
+            document.getElementById('nextTask').innerText = `Задание на уровень: ${tasks[currentLevel - 1].task}`;
+            alert(`Поздравляем! Вы достигли уровня ${currentLevel} и получили награду: ${reward}`);
         }
     }
+
+    // Инициализируем начальное задание
+    document.getElementById('nextTask').innerText = `Задание на уровень: ${tasks[currentLevel - 1].task}`;
 </script>
 
 </body>
