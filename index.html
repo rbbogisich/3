@@ -171,15 +171,15 @@
     ];
 
     const tasks = [
-        { level: 1, task: 'Посадить 2 капусты и собрать 2 урожая.' },
-        { level: 2, task: 'Посадить 3 морковки и собрать 3 урожая.' },
-        { level: 3, task: 'Посадить 4 капусты и собрать 4 урожая.' },
-        { level: 4, task: 'Посадить 5 капуст и собрать 5 урожая.' },
-        { level: 5, task: 'Посадить 6 морковок и собрать 6 урожая.' },
-        { level: 6, task: 'Посадить 7 капуст и собрать 7 урожая.' },
-        { level: 7, task: 'Посадить 8 морковок и собрать 8 урожая.' },
-        { level: 8, task: 'Посадить 9 капуст и собрать 9 урожая.' },
-        { level: 9, task: 'Посадить 10 морковок и собрать 10 урожая.' },
+        { level: 1, task: 'Посадить 2 капусты и собрать 2 капусты.' },
+        { level: 2, task: 'Посадить 3 морковки и собрать 3 морковки.' },
+        { level: 3, task: 'Посадить 4 капусты и собрать 4 капусты.' },
+        { level: 4, task: 'Посадить 5 капуст и собрать 5 капуст.' },
+        { level: 5, task: 'Посадить 6 морковок и собрать 6 морковок.' },
+        { level: 6, task: 'Посадить 7 капуст и собрать 7 капуст.' },
+        { level: 7, task: 'Посадить 8 морковок и собрать 8 морковок.' },
+        { level: 8, task: 'Посадить 9 капуст и собрать 9 капуст.' },
+        { level: 9, task: 'Посадить 10 морковок и собрать 10 морковок.' },
         { level: 10, task: 'Максимальный уровень! Поздравляем!' }
     ];
 
@@ -189,8 +189,8 @@
         }
     });
 
-    document.getElementById('harvestButton').addEventListener('click', harvest);
     document.getElementById('walletButton').addEventListener('click', openWalletModal);
+    document.getElementById('saveWalletButton').addEventListener('click', saveWallet);
     document.getElementById('plantButton').addEventListener('click', openPlantSelectionModal);
     document.getElementById('cabbageButton').addEventListener('click', () => selectPlant('cabbage'));
     document.getElementById('carrotButton').addEventListener('click', () => selectPlant('carrot'));
@@ -212,17 +212,6 @@
             plantSelectionModal.style.display = "none";
         }
     }
-
-    document.getElementById('saveWalletButton').addEventListener('click', function() {
-        const walletAddress = document.getElementById('walletAddress').value;
-        if (walletAddress) {
-            alert(`Адрес кошелька сохранен: ${walletAddress}`);
-            walletModal.style.display = "none"; // Закрываем модальное окно
-            document.getElementById('walletAddress').value = ''; // Очищаем поле ввода
-        } else {
-            alert('Пожалуйста, введите адрес кошелька.');
-        }
-    });
 
     function openWalletModal() {
         walletModal.style.display = "block";
@@ -307,7 +296,6 @@
     }
 
     function checkLevelUp() {
-        const totalHarvested = cabbageCount + carrotCount;
         const requiredTasks = tasks.find(task => task.level === currentLevel);
         const requiredPlantings = requiredTasks.task.match(/\d+/g).map(Number); // Извлекаем количество семян из задания
 
@@ -316,13 +304,24 @@
             document.getElementById('currentReward').innerText = `Вы получили: ${reward}`;
             currentLevel++;
             document.getElementById('currentLevel').innerText = currentLevel;
-            document.getElementById('nextTask').innerText = `Задание на уровень: ${tasks[currentLevel - 1].task}`;
+            document.getElementById('levelTask').innerText = tasks[currentLevel - 1].task;
             alert(`Поздравляем! Вы достигли уровня ${currentLevel} и получили награду: ${reward}`);
         }
     }
 
+    function saveWallet() {
+        const walletAddress = document.getElementById('walletAddress').value;
+        if (walletAddress) {
+            alert(`Адрес кошелька сохранен: ${walletAddress}`);
+            walletModal.style.display = "none"; // Закрываем модальное окно
+            document.getElementById('walletAddress').value = ''; // Очищаем поле ввода
+        } else {
+            alert('Пожалуйста, введите адрес кошелька.');
+        }
+    }
+
     // Инициализируем начальное задание
-    document.getElementById('nextTask').innerText = `Задание на уровень: ${tasks[currentLevel - 1].task}`;
+    document.getElementById('levelTask').innerText = tasks[currentLevel - 1].task;
 </script>
 
 </body>
